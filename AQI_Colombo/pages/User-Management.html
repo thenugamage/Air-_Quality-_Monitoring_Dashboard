@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management - Air Quality Monitoring</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Internal CSS -->
+    <style>
+        :root {
+            --primary: #3f51b5;
+            --primary-light: #5c6bc0;
+            --primary-dark: #303f9f;
+            --accent: #5c9dff;
+            --text-on-dark: #ffffff;
+            --text-primary: #303f9f;
+            --text-secondary: #5c6bc0;
+            --background-light: #f0f2f9;
+            --background-dark: #262a33;
+            --background-darker: #32363e;
+            --white: #ffffff;
+            --shadow: 0 4px 6px rgba(63, 81, 181, 0.1);
+            
+            /* Status colors */
+            --status-active: #00e400;
+            --status-inactive: #9e9e9e;
+            --status-error: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-light);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Layout Structure */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--background-dark);
+            color: var(--text-on-dark);
+            width: 250px;
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .sidebar-header h2 {
+            color: var(--accent);
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            position: relative;
+            margin-bottom: 5px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-on-dark);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(92, 157, 255, 0.1);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-link.active {
+            background-color: rgba(92, 157, 255, 0.2);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
+        }
+
+        .nav-icon {
+            width: 25px;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 250px; /* Same as sidebar width */
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: 6px;
+            border: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: rgba(63, 81, 181, 0.1);
+        }
+
+        .btn i {
+            margin-right: 8px;
+        }
+
+        /* Search box */
+        .search-container {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px 12px 40px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+
+        /* Users table */
+        .users-table {
+            width: 100%;
+            background: var(--white);
+            border-collapse: collapse;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .users-table th {
+            background-color: var(--primary-light);
+            color: var(--white);
+            font-weight: 500;
+        }
+
+        .users-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .users-table tbody tr {
+            transition: background-color 0.3s ease;
+        }
+
+        .users-table tbody tr:hover {
+            background-color: rgba(92, 157, 255, 0.05);
+        }
+
+        /* Role indicators */
+        .role-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .role-admin {
+            background-color: rgba(63, 81, 181, 0.15);
+            color: var(--primary);
+        }
+
+        .role-user {
+            background-color: rgba(76, 175, 80, 0.15);
+            color: #4CAF50;
+        }
+
+        .role-viewer {
+            background-color: rgba(255, 152, 0, 0.15);
+            color: #FF9800;
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+
+        .status-active {
+            background-color: var(--status-active);
+        }
+
+        .status-inactive {
+            background-color: var(--status-inactive);
+        }
+
+        /* Action buttons within table */
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background-color: rgba(92, 157, 255, 0.1);
+            color: var(--primary);
+        }
+
+        .edit-btn:hover {
+            background-color: rgba(92, 157, 255, 0.2);
+        }
+
+        .delete-btn {
+            background-color: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+
+        /* User Form Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            width: 500px;
+            max-width: 90%;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background-color: var(--primary);
+            color: var(--white);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2);
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: var(--white);
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(63, 81, 181, 0.2);
+        }
+
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            margin: 0 5px;
+            border-radius: 6px;
+            background-color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-btn:hover {
+            background-color: rgba(92, 157, 255, 0.1);
+            border-color: var(--primary-light);
+        }
+
+        .pagination-btn.active {
+            background-color: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--background-dark);
+            color: var(--text-on-dark);
+            padding: 20px;
+            text-align: center;
+            margin-top: auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .footer-link {
+            color: var(--text-on-dark);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--accent);
+        }
+
+        .copyright {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        /* Menu toggle for mobile */
+        .menu-toggle {
+            display: none;
+            background-color: var(--background-dark);
+            color: var(--white);
+            border: none;
+            border-radius: 5px;
+            width: 40px;
+            height: 40px;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            left: 15px;
+            top: 15px;
+            z-index: 101;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            padding: 0;
+        }
+
+        /* Hamburger menu styling */
+        .hamburger-menu {
+            width: 24px;
+            height: 18px;
+            position: relative;
+            transform: rotate(0deg);
+            transition: .5s ease-in-out;
+            cursor: pointer;
+        }
+
+        .hamburger-menu span {
+            display: block;
+            position: absolute;
+            height: 3px;
+            width: 100%;
+            background: var(--white);
+            border-radius: 9px;
+            opacity: 1;
+            left: 0;
+            transform: rotate(0deg);
+            transition: .25s ease-in-out;
+        }
+
+        .hamburger-menu span:nth-child(1) {
+            top: 0px;
+        }
+
+        .hamburger-menu span:nth-child(2),
+        .hamburger-menu span:nth-child(3) {
+            top: 8px;
+        }
+
+        .hamburger-menu span:nth-child(4) {
+            top: 16px;
+        }
+
+        /* Animated hamburger menu when active */
+        .hamburger-menu.open span:nth-child(1) {
+            top: 8px;
+            width: 0%;
+            left: 50%;
+        }
+
+        .hamburger-menu.open span:nth-child(2) {
+            transform: rotate(45deg);
+        }
+
+        .hamburger-menu.open span:nth-child(3) {
+            transform: rotate(-45deg);
+        }
+
+        .hamburger-menu.open span:nth-child(4) {
+            top: 8px;
+            width: 0%;
+            left: 50%;
+        }
+
+        /* Responsive Breakpoints */
+        /* Tablet View */
+        @media (max-width: 1024px) {
+            .users-table {
+                min-width: 700px;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+
+        /* Mobile View */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+                width: 100%;
+            }
+            
+            .menu-toggle {
+                display: flex;
+            }
+            
+            .header {
+                margin-top: 30px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header h1 {
+                margin-bottom: 15px;
+            }
+            
+            .user-info {
+                margin-top: 10px;
+            }
+            
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .table-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+            }
+            
+            .footer-link {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Menu Toggle Button (visible only on mobile) -->
+    <button class="menu-toggle" id="menu-toggle">
+        <div class="hamburger-menu">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </button>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>AirMonitor</h2>
+                <p>Air Quality Dashboard</p>
+            </div>
+            <ul class="nav-list">
+                <li class="nav-item">
+                    <a href="Admin-Dashboard.html" class="nav-link">
+                        <i class="fas fa-tachometer-alt nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Manage-Sensors.html" class="nav-link">
+                        <i class="fas fa-microchip nav-icon"></i>
+                        <span>Manage Sensors</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="View-Sensor-Data.html" class="nav-link">
+                        <i class="fas fa-chart-line nav-icon"></i>
+                        <span>Sensor Data</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="User-Management.html" class="nav-link active">
+                        <i class="fas fa-users-cog nav-icon"></i>
+                        <span>User Management</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">
+                        <i class="fas fa-cog nav-icon"></i>
+                        <span>Settings</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="login.html" class="nav-link">
+                        <i class="fas fa-sign-out-alt nav-icon"></i>
+                        <span>Log Out</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h1>User Management</h1>
+                <div class="user-info">
+                    <div class="user-avatar">A</div>
+                    <span class="user-name">Admin User</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="add-user-btn">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Add New User</span>
+                </button>
+                <button class="btn btn-outline" id="export-btn">
+                    <i class="fas fa-file-export"></i>
+                    <span>Export User List</span>
+                </button>
+                
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Search by username, email or role...">
+            </div>
+
+            <!-- Users Table -->
+            <div class="table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            
+                            <th>Last Login</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        
+                    </tbody>
+                </table>
+            </div>
+<!-- Bootstrap User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="user-form">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title" id="userModalLabel">Add New User</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
+              </div>
+              <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+              <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" required>
+                  <option value="">Select Role</option>
+                  <option value="admin">Admin</option>
+                  <option value="user">User</option>
+                  <option value="viewer">Viewer</option>
+                </select>
+              </div>
+              
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="save-user-btn">Save User</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+            <!-- Pagination -->
+            <div class="pagination">
+                <button class="pagination-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="pagination-btn active">1</button>
+                <button class="pagination-btn">2</button>
+                <button class="pagination-btn">3</button>
+                <button class="pagination-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Add New User</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" class="form-control" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" class="form-control" placeholder="Enter email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" class="form-control" placeholder="Enter password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="role">Role</label>
+                        <select id="role" class="form-select" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Admin</option>
+                            <option value="user">User</option>
+                            <option value="viewer">Viewer</option>
+                        </select>
+                    </div>
+                   
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-user-btn">Save User</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div class="footer-links">
+            <a href="#" class="footer-link">About the Project</a>
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Contact Us</a>
+        </div>
+        <div class="copyright">
+            © 2025 Real-time Air Quality Monitoring Project
+        </div>
+    </div>
+<!-- Bootstrap JS (with Popper) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const userModalInstance = new bootstrap.Modal(document.getElementById('userModal'));
+    const userForm = document.getElementById('user-form');
+    let editingUserId = null;
+
+    // Open "Add User" modal
+    document.getElementById('add-user-btn').addEventListener('click', () => {
+        editingUserId = null;
+        userForm.reset();
+        document.getElementById('userModalLabel').textContent = 'Add New User';
+        userModalInstance.show();
+    });
+
+    // Handle Save User (Create or Update)
+    userForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const data = {
+            name: document.getElementById('username').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value,
+            role: document.getElementById('role').value
+        };
+
+        const url = editingUserId
+            ? `http://127.0.0.1:8000/api/users/${editingUserId}`
+            : `http://127.0.0.1:8000/api/users`;
+        const method = editingUserId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(res => {
+            if (!res.ok) throw new Error('Failed to save user.');
+            return res.json();
+        })
+        .then(() => {
+            userModalInstance.hide();
+            loadUsers();
+            alert('User saved successfully.');
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error saving user.');
+        });
+    });
+
+    // Load all users
+    function loadUsers() {
+        fetch('http://127.0.0.1:8000/api/users')
+            .then(res => res.json())
+            .then(users => {
+                const tbody = document.querySelector('.users-table tbody');
+                tbody.innerHTML = '';
+                users.forEach(user => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td><span class="role-badge role-${user.role}">${capitalize(user.role)}</span></td>
+                        <td>${new Date(user.updated_at).toLocaleString()}</td>
+                        <td>
+                            <div class="table-actions">
+                                <button class="action-btn edit-btn" data-id="${user.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="action-btn delete-btn" data-id="${user.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                bindActionButtons();
+            });
+    }
+
+    // Capitalize helper
+    function capitalize(str) {
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Bind Edit/Delete buttons
+    function bindActionButtons() {
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                fetch(`http://127.0.0.1:8000/api/users/${id}`)
+                    .then(res => res.json())
+                    .then(user => {
+                        editingUserId = id;
+                        document.getElementById('username').value = user.name;
+                        document.getElementById('email').value = user.email;
+                        document.getElementById('password').value = '********';
+                        document.getElementById('role').value = user.role;
+                        document.getElementById('userModalLabel').textContent = 'Edit User';
+                        userModalInstance.show();
+                    });
+            });
+        });
+
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                if (confirm("Are you sure you want to delete this user?")) {
+                    fetch(`http://127.0.0.1:8000/api/users/${id}`, {
+                        method: 'DELETE'
+                    })
+                    .then(() => {
+                        loadUsers();
+                        alert('User deleted successfully.');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        alert('Failed to delete user.');
+                    });
+                }
+            });
+        });
+    }
+
+    // Search filtering
+    document.querySelector('.search-input').addEventListener('input', function () {
+        const search = this.value.toLowerCase();
+        document.querySelectorAll('.users-table tbody tr').forEach(row => {
+            const match = [...row.children].some(td => td.textContent.toLowerCase().includes(search));
+            row.style.display = match ? '' : 'none';
+        });
+    });
+
+    // Export to Excel
+    document.querySelector('.btn-outline').addEventListener('click', () => {
+        const table = document.querySelector('.users-table');
+        const workbook = XLSX.utils.table_to_book(table, { sheet: "Users" });
+        XLSX.writeFile(workbook, 'User_List.xlsx');
+    });
+
+    // Initial load
+    loadUsers();
+});
+</script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    
+    </body>
+    </html>        

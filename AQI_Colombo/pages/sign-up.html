@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Sign Up - Admin Dashboard</title>
+
+    <!-- Internal CSS -->
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            font-family: gotham, sans-serif;
+        }
+        body {
+            line-height: 1.6;
+            color: #303f9f;
+            background-color: #f0f2f9;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-container {
+            flex: 1;
+            margin: 20px;
+            margin-bottom: 80px; /* Space for footer */
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(63, 81, 181, 0.1);
+            display: flex;
+            flex-direction: column;
+            background-color: white;
+        }
+        header {
+            display: flex;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            height: 70px;
+            padding: 0 20px;
+            background: #3f51b5;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px 10px 0 0;
+        }
+        .nav-container h1 {
+            color: white;
+            font-size: 1.8rem;
+        }
+        .signup-container {
+            width: 100%;
+            max-width: 450px;
+            margin: 60px auto;
+            padding: 35px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #3f51b5;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+        }
+        label {
+            color: #555;
+            font-weight: 500;
+        }
+        input[type="text"], input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
+            border-color: #3f51b5;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.2);
+        }
+        input[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #3f51b5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        input[type="submit"]:hover {
+            background-color: #303f9f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        input[type="submit"]:active {
+            transform: translateY(0);
+        }
+        .error-message {
+            color: #f44336;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: rgba(244, 67, 54, 0.1);
+            border-radius: 5px;
+            display: none;
+        }
+        /* Footer Styles - Fixed */
+        footer {
+            background-color: #3f51b5;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+            border-radius: 0 0 10px 10px;
+        }
+        footer p {
+            font-size: 0.9rem;
+        }
+        /* Responsive Styling */
+        @media (max-width: 600px) {
+            .signup-container {
+                width: 90%;
+                padding: 20px;
+                margin: 40px auto;
+            }
+            .main-container {
+                margin: 10px;
+                margin-bottom: 60px;
+            }
+            .nav-container h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Header Section -->
+        <header>
+            <div class="nav-container">
+                <h1>Sign Up - Admin Dashboard</h1>
+            </div>
+        </header>
+
+        <!-- Sign Up Container -->
+        <div class="signup-container">
+            <h2>Create an Admin Account</h2>
+
+            <!-- Sign Up Form -->
+            <form id="signup-form" method="POST" onsubmit="return validateForm()">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+
+                <input type="submit" value="Sign Up">
+            </form>
+
+            <!-- Error message -->
+            <div id="error-message" class="error-message">
+                <p>Passwords do not match or some fields are missing. Please check again.</p>
+            </div>
+        </div>
+
+        <!-- Footer Section - Fixed -->
+        <footer>
+            <p>© 2025 Real-time Air Quality Monitoring Project</p>
+        </footer>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Form validation function
+        function validateForm() {
+            var username = document.getElementById('username').value;
+            var email = document.getElementById('email').value;
+            var password = document.getElementById('password').value;
+            var confirmPassword = document.getElementById('confirm-password').value;
+
+            // Check if fields are empty
+            if (username === "" || email === "" || password === "" || confirmPassword === "") {
+                document.getElementById('error-message').style.display = 'block';
+                return false;
+            }
+
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                document.getElementById('error-message').style.display = 'block';
+                return false;
+            }
+
+            // If everything is valid, hide error message
+            document.getElementById('error-message').style.display = 'none';
+            return true;
+        }
+    </script>
+
+</body>
+</html>
